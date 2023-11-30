@@ -1,6 +1,5 @@
 import numpy as np
 
-from sklearn.datasets import fetch_20newsgroups
 from sklearn.metrics.cluster import normalized_mutual_info_score, adjusted_rand_score
 from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA
@@ -8,7 +7,6 @@ from sklearn.cluster import KMeans, AgglomerativeClustering
 
 import pandas as pd
 import umap
-from sentence_transformers import SentenceTransformer
 import argparse
 
 

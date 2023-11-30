@@ -33,7 +33,7 @@ def dim_red(mat, p, method):
 
 
 def clust(mat, k):
-  kmeans = KMeans(n_clusters=k, random_state=42)
+  kmeans = KMeans(n_clusters=k)
   kmeans.fit(mat)
   return kmeans.labels_
 
@@ -47,6 +47,9 @@ parser = argparse.ArgumentParser(description='Dimensionality Reduction and Clust
 # Add an argument for choosing the method
 parser.add_argument('--method', choices=methods, help='Choose a dimensionality reduction method')
 
+# Add an argument for the number of runs
+parser.add_argument('--multipleruns', type=int, default=1, help='Number of runs for clustering')
+
 # Parse the arguments
 args = parser.parse_args()
 
@@ -54,6 +57,9 @@ args = parser.parse_args()
 chosen_method = args.method if args.method else 'ACP'
 
 nb_dim = 3 if chosen_method == 'T-SNE' else 20
+
+# Perform multiple clustering calls
+
 
 ng20 = fetch_20newsgroups(subset='test')
 corpus = ng20.data[:2000]
@@ -64,17 +70,31 @@ k = len(set(labels))
 model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
 embeddings = model.encode(corpus)
 
+red_emb = dim_red(embeddings, nb_dim, chosen_method)
 
-# Rest of your code
-for method in methods:
-    if method == chosen_method:
-        red_emb = dim_red(embeddings, nb_dim, method)
-    else:
-        continue
+
+# Perform multiple clustering calls
+nmi_scores = []
+ari_scores = []
+
+
+for _ in range(args.multipleruns):
 
     pred = clust(red_emb, k)
 
     nmi_score = normalized_mutual_info_score(pred, labels)
     ari_score = adjusted_rand_score(pred, labels)
 
-    print(f'Method: {method}\nNMI: {nmi_score:.2f} \nARI: {ari_score:.2f}\n')
+    nmi_scores.append(nmi_score)
+    ari_scores.append(ari_score)
+
+# Calculate mean and standard deviation
+mean_nmi = np.mean(nmi_scores)
+std_nmi = np.std(nmi_scores)
+
+mean_ari = np.mean(ari_scores)
+std_ari = np.std(ari_scores)
+
+# Print the results
+print(f'NMI: {mean_nmi:.2f} ± {std_nmi:.2f}')
+print(f'ARI: {mean_ari:.2f} ± {std_ari:.2f}')

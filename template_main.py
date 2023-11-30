@@ -40,15 +40,11 @@ embeddings = model.encode(corpus)
 
 methods = ['ACP','UMAP']
 for method in methods:
-    # Perform dimensionality reduction
     red_emb = dim_red(embeddings, 20, method)
 
-    # Perform clustering
     pred = clust(red_emb, k)
 
-    # Evaluate clustering results
     nmi_score = normalized_mutual_info_score(pred, labels)
     ari_score = adjusted_rand_score(pred, labels)
 
-    # Print results
     print(f'Method: {method}\nNMI: {nmi_score:.2f} \nARI: {ari_score:.2f}\n')

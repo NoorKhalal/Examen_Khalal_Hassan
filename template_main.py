@@ -4,7 +4,7 @@ from sklearn.datasets import fetch_20newsgroups
 from sklearn.metrics.cluster import normalized_mutual_info_score, adjusted_rand_score
 from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans, AgglomerativeClustering
 
 import umap
 from sentence_transformers import SentenceTransformer
@@ -23,7 +23,7 @@ def dim_red(mat, p, method):
       red_mat = reducer.fit_transform(mat)
     
     elif method=='T-SNE':
-        tsne = TSNE(n_components=p, init='pca', perplexity=50, random_state=42, n_jobs=-1) #init peut etre 'random' aussi
+        tsne = TSNE(n_components=p, init='pca', perplexity=50, n_jobs=-1) 
         red_mat = tsne.fit_transform(mat)
     else:
         raise Exception("Please select one of the three methods : APC, AFC, UMAP")
@@ -33,7 +33,7 @@ def dim_red(mat, p, method):
 
 def clus(mat, clus_tech ,k):
   if clus_tech=='kmeans':
-    kmeans = KMeans(n_clusters=k)
+    kmeans = KMeans(n_clusters=k, n_init=10)
     kmeans.fit(mat)
     labels=kmeans.labels_
   elif clus_tech=='CAH-ward':
@@ -68,7 +68,7 @@ parser.add_argument('--multipleruns', type=int, default=1, help='Number of runs 
 # Parse the arguments
 args = parser.parse_args()
 
-nb_dim = 3 if chosen_method == 'T-SNE' else 20
+nb_dim = 3 if args.dim_red_method == 'T-SNE' else 20
 
 # Perform multiple clustering calls
 
@@ -82,7 +82,7 @@ k = len(set(labels))
 model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
 embeddings = model.encode(corpus)
 
-red_emb = dim_red(embeddings, nb_dim, chosen_method)
+red_emb = dim_red(embeddings, nb_dim, args.dim_red_method)
 
 
 # Perform multiple clustering calls
@@ -107,6 +107,7 @@ std_nmi = np.std(nmi_scores)
 mean_ari = np.mean(ari_scores)
 std_ari = np.std(ari_scores)
 
+print(f'Results for {args.clus_method} on data reduced by {args.dim_red_method} with {args.multipleruns} iterations: ')
 # Print the results
 print(f'NMI: {mean_nmi:.2f} ± {std_nmi:.2f}')
 print(f'ARI: {mean_ari:.2f} ± {std_ari:.2f}')

@@ -46,7 +46,11 @@ embeddings = model.encode(corpus)
 methods = ['ACP','UMAP', 'T-SNE']
 
 for method in methods:
-    red_emb = dim_red(embeddings, 20, method)
+    if method=='T-SNE':
+          red_emb = dim_red(embeddings, 2, method)
+
+    else:   
+        red_emb = dim_red(embeddings, 20, method)
 
     pred = clust(red_emb, k)
 

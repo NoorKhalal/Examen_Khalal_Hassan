@@ -2,6 +2,7 @@ from sklearn.datasets import fetch_20newsgroups
 from sklearn.metrics.cluster import normalized_mutual_info_score, adjusted_rand_score
 from sentence_transformers import SentenceTransformer
 import numpy as np
+from sklearn.manifold import TSNE
 
 from sklearn.decomposition import PCA
 import umap
@@ -17,9 +18,13 @@ def dim_red(mat, p, method):
     elif method=='UMAP':
       reducer = umap.UMAP(n_components=p)
       red_mat = reducer.fit_transform(mat)
-
+    
+    elif method=='T-SNE':
+        tsne = TSNE(n_components=p, init='pca', perplexity=50, random_state=42, n_jobs=-1) #init peut etre 'random' aussi
+        red_mat = tsne.fit_transform(mat)
+      
     else:
-        raise Exception("Please select one of the three methods : APC, AFC, UMAP")
+        raise Exception("Please select one of the three methods : T-SNE, AFC, UMAP")
 
     return red_mat
 
@@ -38,7 +43,8 @@ k = len(set(labels))
 model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
 embeddings = model.encode(corpus)
 
-methods = ['ACP','UMAP']
+methods = ['ACP','UMAP', 'T-SNE']
+
 for method in methods:
     red_emb = dim_red(embeddings, 20, method)
 

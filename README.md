@@ -65,4 +65,5 @@ The notebook generates scatter plots using Plotly Express and Seaborn to visuali
 ## Data Loading
 In an effort to optimize both execution time and the overall size of the Docker image, we have taken the initiative to store the embeddings and labels from the dataset. This decision has been implemented by saving the relevant information in two designated files: `embeddings.csv` and `labels.npy`. This approach not only enhances the efficiency of execution but also contributes to a more streamlined and resource-efficient Docker image, ensuring a smoother and more responsive deployment process.
 
-
+## Link to the Dockerhub image:
+https://hub.docker.com/layers/youssefhassan12/examen/latest/images/sha256:fcb1db5178a60836411e572621ad609c21716b3bf292e6d6968630f2fc343a73

@@ -25,36 +25,48 @@ def dim_red(mat, p, method):
     elif method=='T-SNE':
         tsne = TSNE(n_components=p, init='pca', perplexity=50, random_state=42, n_jobs=-1) #init peut etre 'random' aussi
         red_mat = tsne.fit_transform(mat)
-      
     else:
-        raise Exception("Please select one of the three methods : T-SNE, AFC, UMAP")
+        raise Exception("Please select one of the three methods : APC, AFC, UMAP")
 
     return red_mat
 
 
-def clust(mat, k):
-  kmeans = KMeans(n_clusters=k)
-  kmeans.fit(mat)
-  return kmeans.labels_
+def clus(mat, clus_tech ,k):
+  if clus_tech=='kmeans':
+    kmeans = KMeans(n_clusters=k)
+    kmeans.fit(mat)
+    labels=kmeans.labels_
+  elif clus_tech=='CAH-ward':
+    agglomerative_clustering = AgglomerativeClustering(n_clusters=k)
+    labels = agglomerative_clustering.fit_predict(mat)
+  elif clus_tech=='CAH-min':
+    agglomerative_clustering = AgglomerativeClustering(n_clusters=k,linkage='single')
+    labels = agglomerative_clustering.fit_predict(mat)
+  elif clus_tech=='CAH-max':
+    agglomerative_clustering = AgglomerativeClustering(n_clusters=k,linkage='complete')
+    labels = agglomerative_clustering.fit_predict(mat)
 
+    
+  return labels
 
 # methods that are available in this script
 methods = ['ACP', 'UMAP', 'T-SNE']
+clustering_methods=['kmeans','CAH-ward','CAH-min','CAH-max']
 
 # Create an argument parser
 parser = argparse.ArgumentParser(description='Dimensionality Reduction and Clustering')
 
 # Add an argument for choosing the method
-parser.add_argument('--method', choices=methods, help='Choose a dimensionality reduction method')
+parser.add_argument('--dim_red_method', choices=methods, default='ACP', help='Choose a dimensionality reduction method')
+
+# Add an argument for choosing the method
+parser.add_argument('--clus_method', choices=clustering_methods, default='kmeans', help='Choose a clustering reduction method')
 
 # Add an argument for the number of runs
 parser.add_argument('--multipleruns', type=int, default=1, help='Number of runs for clustering')
 
 # Parse the arguments
 args = parser.parse_args()
-
-# Use the chosen method or default to 'ACP' if no method is provided
-chosen_method = args.method if args.method else 'ACP'
 
 nb_dim = 3 if chosen_method == 'T-SNE' else 20
 
@@ -80,7 +92,7 @@ ari_scores = []
 
 for _ in range(args.multipleruns):
 
-    pred = clust(red_emb, k)
+    pred = clus(red_emb,args.clus_method, k)
 
     nmi_score = normalized_mutual_info_score(pred, labels)
     ari_score = adjusted_rand_score(pred, labels)

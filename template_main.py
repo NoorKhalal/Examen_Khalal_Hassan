@@ -6,6 +6,7 @@ from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans, AgglomerativeClustering
 
+import pandas as pd
 import umap
 from sentence_transformers import SentenceTransformer
 import argparse
@@ -74,6 +75,7 @@ nb_dim = 3 if args.dim_red_method == 'T-SNE' else 20
 
 
 labels = np.load('labels.npy')
+k=len(set(labels))
 
 embeddings=pd.read_csv('embeddings.csv').values
 

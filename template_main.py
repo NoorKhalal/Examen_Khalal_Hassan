@@ -2,6 +2,7 @@ from sklearn.datasets import fetch_20newsgroups
 from sklearn.metrics.cluster import normalized_mutual_info_score, adjusted_rand_score
 from sentence_transformers import SentenceTransformer
 import numpy as np
+from sklearn.manifold import TSNE
 
 
 def dim_red(mat, p, method):
@@ -16,14 +17,10 @@ def dim_red(mat, p, method):
     ------
         red_mat : NxP list such that p<<m
     '''
-    if method=='ACP':
-        red_mat = mat[:,:p]
-        
-    elif method=='AFC':
-        red_mat = mat[:,:p]
-        
-    elif method=='UMAP':
-        red_mat = mat[:,:p]
+    if method=='T-SNE':
+        # Convert the NumPy array to a pandas DataFrame
+        tsne = TSNE(n_components=p, init='pca', perplexity=50, random_state=42, n_jobs=-1) #init peut etre 'random' aussi
+        red_mat = tsne.fit_transform(mat)
         
     else:
         raise Exception("Please select one of the three methods : APC, AFC, UMAP")
@@ -59,7 +56,7 @@ model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
 embeddings = model.encode(corpus)
 
 # Perform dimensionality reduction and clustering for each method
-methods = ['ACP', 'AFC', 'UMAP']
+methods = ['T-SNE']
 for method in methods:
     # Perform dimensionality reduction
     red_emb = dim_red(embeddings, 20, method)

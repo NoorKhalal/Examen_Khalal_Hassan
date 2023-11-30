@@ -73,14 +73,9 @@ nb_dim = 3 if args.dim_red_method == 'T-SNE' else 20
 # Perform multiple clustering calls
 
 
-ng20 = fetch_20newsgroups(subset='test')
-corpus = ng20.data[:2000]
-labels = ng20.target[:2000]
-k = len(set(labels))
+labels = np.load('labels.npy')
 
-# embedding
-model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
-embeddings = model.encode(corpus)
+embeddings=pd.read_csv('embeddings.csv').values
 
 red_emb = dim_red(embeddings, nb_dim, args.dim_red_method)
 
